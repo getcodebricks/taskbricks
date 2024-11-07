@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Taskbricks Bounded Context Stack
+Parameters:
+    PostgresUsername:
+        Type: String
+    PostgresPassword:
+        Type: String
+Transform:
+    - AWS::Serverless-2016-10-31
+Resources:
+    EventBus:
+        Type: AWS::Events::EventBus
+        Properties:
+            Name: Taskbricks-EventBus
+    Database:
+        Type: AWS::RDS::DBInstance
+        Properties:
+            DBInstanceIdentifier: taskbricks
+            DBInstanceClass: db.t4g.micro
+            Engine: postgres
+            EngineVersion: "16.2"
+            AllocatedStorage: 20
+            MasterUsername:
+                Ref: PostgresUsername
+            MasterUserPassword:
+                Ref: PostgresPassword
+            EnablePerformanceInsights: true
+            PubliclyAccessible: true
+Outputs:
+    EventBusArn:
+        Value:
+            Fn::GetAtt: EventBus.Arn
+    EventBusName:
+        Value:
+            Fn::GetAtt: EventBus.Name
+    PostgresEndpoint:
+        Value:
+            Fn::GetAtt: Database.Endpoint.Address

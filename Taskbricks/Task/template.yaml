@@ -1,0 +1,269 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Task Aggregate Stack
+Parameters:
+    PostgresUrl:
+        Type: String
+    EventBusArn:
+        Type: String
+    EventBusName:
+        Type: String
+    JwtSecret:
+        Type: String
+Transform:
+    - AWS::Serverless-2016-10-31
+Globals:
+    Function:
+        Environment:
+            Variables:
+                NODE_PATH: ./:/opt/node_modules:/opt
+                PUBLISHER_QUEUE:
+                    Ref: PublisherQueue
+                POSTGRES_URL:
+                    Ref: PostgresUrl
+                EVENT_BUS_ARN:
+                    Ref: EventBusArn
+                EVENT_BUS_NAME:
+                    Ref: EventBusName
+                JWT_SECRET:
+                    Ref: JwtSecret
+Resources:
+    LayerShared:
+        Type: AWS::Serverless::LayerVersion
+        Properties:
+            LayerName: task-shared
+            Description: Task shared layer
+            ContentUri: dist/layers/layer-shared
+            CompatibleRuntimes:
+                - nodejs20.x
+            RetentionPolicy: Retain
+    LayerNodeModules:
+        Type: AWS::Serverless::LayerVersion
+        Properties:
+            LayerName: task-node-modules
+            Description: Task node modules layer
+            ContentUri: dist/layers/layer-node_modules
+            CompatibleRuntimes:
+                - nodejs20.x
+            RetentionPolicy: Retain
+    ApiGateway:
+        Type: AWS::Serverless::Api
+        Properties:
+            StageName: Prod
+            TracingEnabled: true
+            EndpointConfiguration: REGIONAL
+            Cors:
+                AllowMethods: "'*'"
+                AllowHeaders: "'*'"
+                AllowOrigin: "'*'"
+                MaxAge: "'600'"
+            GatewayResponses:
+                UNAUTHORIZED:
+                    StatusCode: 401
+                    ResponseParameters:
+                        Headers:
+                            Access-Control-Allow-Origin: "'*'"
+                            Access-Control-Allow-Headers: "'*'"
+                            Access-Control-Allow-Methods: "'*'"
+                            Access-Control-Allow-Credentials: true
+    TaskAddTask6fdbb:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: dist/src/useCases/write/AddTask/
+            Handler: infrastructure/AddTaskApiHandler.handler
+            Layers:
+                - Ref: LayerShared
+                - Ref: LayerNodeModules
+            Runtime: nodejs20.x
+            MemorySize: 1024
+            Timeout: 99
+            Policies:
+                - CloudWatchLambdaInsightsExecutionRolePolicy
+                - SQSSendMessagePolicy:
+                      QueueName:
+                          Fn::GetAtt: PublisherQueue.QueueName
+            Events:
+                Api:
+                    Type: Api
+                    Properties:
+                        Path: /add-task
+                        Method: POST
+                        RestApiId:
+                            Ref: ApiGateway
+    TaskCompleteTaskaaec4:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: dist/src/useCases/write/CompleteTask/
+            Handler: infrastructure/CompleteTaskApiHandler.handler
+            Layers:
+                - Ref: LayerShared
+                - Ref: LayerNodeModules
+            Runtime: nodejs20.x
+            MemorySize: 1024
+            Timeout: 99
+            Policies:
+                - CloudWatchLambdaInsightsExecutionRolePolicy
+                - SQSSendMessagePolicy:
+                      QueueName:
+                          Fn::GetAtt: PublisherQueue.QueueName
+            Events:
+                Api:
+                    Type: Api
+                    Properties:
+                        Path: /complete-task
+                        Method: POST
+                        RestApiId:
+                            Ref: ApiGateway
+    TaskTaskOverviewProjection3baf7:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: dist/src/useCases/read/TaskOverviewProjection/
+            Handler: infrastructure/TaskOverviewProjectionHandler.handler
+            Layers:
+                - Ref: LayerShared
+                - Ref: LayerNodeModules
+            Runtime: nodejs20.x
+            MemorySize: 1024
+            Timeout: 99
+            Policies:
+                - CloudWatchLambdaInsightsExecutionRolePolicy
+                - SQSSendMessagePolicy:
+                      QueueName:
+                          Fn::GetAtt: TaskTaskOverviewProjection3baf7Queue.QueueName
+            Events:
+                TaskTaskOverviewProjection3baf7QueueEvent:
+                    Type: SQS
+                    Properties:
+                        Queue:
+                            Fn::GetAtt: TaskTaskOverviewProjection3baf7Queue.Arn
+                        ScalingConfig:
+                            MaximumConcurrency: 2
+    TaskTaskOverviewProjection3baf7Queue:
+        Type: AWS::SQS::Queue
+        Properties:
+            QueueName: TaskTaskOverviewProjection3baf7Queue
+            VisibilityTimeout: 99
+    TaskTaskOverviewProjection3baf7QueuePolicy:
+        Type: AWS::SQS::QueuePolicy
+        Properties:
+            Queues:
+                - Ref: TaskTaskOverviewProjection3baf7Queue
+            PolicyDocument:
+                Id: AllowIncomingAccess
+                Statement:
+                    - Action:
+                          - SQS:SendMessage
+                          - SQS:ReceiveMessage
+                      Effect: Allow
+                      Resource:
+                          - Fn::GetAtt: TaskTaskOverviewProjection3baf7Queue.Arn
+                      Principal: "*"
+    TaskTaskOverviewProjection3baf7QueueEventsRule:
+        Type: AWS::Events::Rule
+        Properties:
+            EventBusName:
+                Ref: EventBusName
+            State: ENABLED
+            EventPattern:
+                source:
+                    - Taskbricks.Task
+            Targets:
+                - Arn:
+                      Fn::GetAtt: TaskTaskOverviewProjection3baf7Queue.Arn
+                  Id: TaskTaskOverviewProjection3baf7QueueEventsRule
+                  InputPath: $.detail
+    TaskTaskOverviewProjection3baf7Recreator:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: dist/src/useCases/read/TaskOverviewProjection/
+            Handler: infrastructure/TaskOverviewRecreatorHandler.handler
+            Layers:
+                - Ref: LayerShared
+                - Ref: LayerNodeModules
+            Runtime: nodejs20.x
+            MemorySize: 1024
+            Timeout: 99
+            Policies:
+                - CloudWatchLambdaInsightsExecutionRolePolicy
+    TaskAssigneeTaskOverview0dd1b:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: dist/src/useCases/read/AssigneeTaskOverview/
+            Handler: infrastructure/AssigneeTaskOverviewApiHandler.handler
+            Layers:
+                - Ref: LayerShared
+                - Ref: LayerNodeModules
+            Runtime: nodejs20.x
+            MemorySize: 1024
+            Timeout: 99
+            Policies:
+                - CloudWatchLambdaInsightsExecutionRolePolicy
+            Events:
+                Api:
+                    Type: Api
+                    Properties:
+                        Path: /assignee-task-overview
+                        Method: GET
+                        RestApiId:
+                            Ref: ApiGateway
+    Taskeaeb3Publisher:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: dist/layers/layer-shared/shared/infrastructure/publishing/
+            Handler: TaskPublisherHandler.handler
+            Layers:
+                - Ref: LayerShared
+                - Ref: LayerNodeModules
+            Runtime: nodejs20.x
+            MemorySize: 1024
+            Timeout: 99
+            Policies:
+                - CloudWatchLambdaInsightsExecutionRolePolicy
+                - SQSSendMessagePolicy:
+                      QueueName:
+                          Fn::GetAtt: PublisherQueue.QueueName
+                - EventBridgePutEventsPolicy:
+                      EventBusName:
+                          Ref: EventBusName
+            Events:
+                PublisherQueueEvent:
+                    Type: SQS
+                    Properties:
+                        Queue:
+                            Fn::GetAtt: PublisherQueue.Arn
+                        ScalingConfig:
+                            MaximumConcurrency: 5
+    PublisherQueue:
+        Type: AWS::SQS::Queue
+        Properties:
+            QueueName: Task-PublisherQueue
+            VisibilityTimeout: 99
+    PublisherQueuePolicy:
+        Type: AWS::SQS::QueuePolicy
+        Properties:
+            Queues:
+                - Ref: PublisherQueue
+            PolicyDocument:
+                Id: AllowIncomingAccess
+                Statement:
+                    - Action:
+                          - SQS:SendMessage
+                          - SQS:ReceiveMessage
+                      Effect: Allow
+                      Resource:
+                          - Fn::GetAtt: PublisherQueue.Arn
+                      Principal: "*"
+    Taskeaeb3Authorizer:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: dist/layers/layer-shared/shared/infrastructure/api/
+            Handler: TaskAuthorizerHandler.handler
+            Layers:
+                - Ref: LayerShared
+                - Ref: LayerNodeModules
+            Runtime: nodejs20.x
+            MemorySize: 1024
+            Timeout: 99
+Outputs:
+    ApiGatewayEndpoint:
+        Value:
+            Fn::Sub: https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/Prod

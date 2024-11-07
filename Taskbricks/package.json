@@ -1,0 +1,5 @@
+{
+    "scripts": {
+        "deploy": "export $(cat .env | xargs) && sam deploy --template-file template.yaml --stack-name taskbricks-context --no-confirm-changeset --resolve-s3 --region $AWS_DEFAULT_REGION --capabilities CAPABILITY_NAMED_IAM --parameter-overrides PostgresUsername=$POSTGRES_USERNAME PostgresPassword=$POSTGRES_PASSWORD"
+    }
+}

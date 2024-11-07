@@ -1,0 +1,53 @@
+{
+    "name": "task",
+    "scripts": {
+        "prebuild": "rm -Rf dist && mkdir dist && cp package.json ./dist/ && npx json -I -f ./dist/package.json -e 'this.scripts={}' -e 'this.devDependencies={}' && cd dist && npm i --omit=dev --package-lock && cd ..",
+        "build": "npm i && tsc --project tsconfig.build.json",
+        "postbuild": "cd dist && mkdir layers && mkdir layers/layer-shared && mv src/shared layers/layer-shared && mkdir layers/layer-node_modules && mv node_modules layers/layer-node_modules && cd ..",
+        "lint": "eslint . --ext .ts",
+        "test": "export $(cat ../.env-test | xargs) && export $(cat .env-test | xargs) && nyc --reporter=html mocha  -r ts-node/register tests/**/*.test.ts",
+        "test:coverage": "export $(cat ../.env-test | xargs) && export $(cat .env-test | xargs) && NODE_OPTIONS=\"--loader ts-node/esm\" && nyc --reporter=html --reporter=html mocha --parallel tests --recursive --extension .test.ts",
+        "test-integration-setup": "export $(cat ../.env-test | xargs) && export $(cat .env-test | xargs) && ts-node ./node_modules/typeorm-extension/bin/cli.cjs db:create --initialDatabase postgres -d ./src/shared/infrastructure/persistence/AppDataSource.ts && typeorm-ts-node-commonjs migration:run -d src/shared/infrastructure/persistence/AppDataSource.ts",
+        "test-integration": "export $(cat ../.env-test | xargs) && export $(cat .env-test | xargs) && nyc --report-dir=./coverage/integration --reporter=html mocha -r ts-node/register -r mocha-suppress-logs --timeout 10000 --exit tests/integration --recursive --extension .test.ts",
+        "test-integration-one": "export $(cat ../.env-test | xargs) && export $(cat .env-test | xargs) && nyc --report-dir=./coverage/integration --reporter=html mocha -r ts-node/register --reporter-option maxDiffSize=0 --timeout 10000 --exit",
+        "test-unit": "export $(cat ../.env-test | xargs) && export $(cat .env-test | xargs) && nyc --report-dir=./coverage/unit --reporter=html mocha -r ts-node/register -r mocha-suppress-logs -p tests/unit --recursive --extension .test.ts",
+        "test-unit-one": "export $(cat ../.env-test | xargs) && export $(cat .env-test | xargs) && nyc --report-dir=./coverage/unit --reporter=html mocha -r ts-node/register",
+        "fast-test": "mocha",
+        "deploy": "export $(cat .env | xargs) && npm run sam-deploy && npm run migrate",
+        "sam-deploy": "sam deploy --template-file template.yaml --stack-name task --no-confirm-changeset --resolve-s3 --region $AWS_DEFAULT_REGION --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --parameter-overrides PostgresUrl=$POSTGRES_URL EventBusArn=$EVENT_BUS_ARN EventBusName=$EVENT_BUS_NAME JwtSecret=$JWT_SECRET",
+        "migrate": "typeorm-ts-node-commonjs migration:run -d src/shared/infrastructure/persistence/AppDataSource.ts"
+    },
+    "dependencies": {
+        "@codebricks/typebricks": "^0.5.6",
+        "@types/node-gzip": "^1.1.3",
+        "@types/uuid": "^9.0.8",
+        "fs": "^0.0.1-security",
+        "is-what": "^4.1.7",
+        "jsonwebtoken": "^9.0.2",
+        "node-gzip": "^1.1.2",
+        "typeorm": "^0.3.20",
+        "uuid": "^10.0.0"
+    },
+    "devDependencies": {
+        "@faker-js/faker": "^8.4.1",
+        "@types/chai": "^4.3.13",
+        "@types/chai-as-promised": "^7.1.8",
+        "@types/jsonwebtoken": "^9.0.6",
+        "@types/mocha": "^10.0.6",
+        "@types/node": "^20.11.30",
+        "@types/sinon": "^17.0.3",
+        "@types/uuid": "^9.0.8",
+        "aws-sdk-client-mock": "^4.0.0",
+        "chai": "^4.4.1",
+        "dotenv": "^16.4.5",
+        "json": "^11.0.0",
+        "mocha": "^10.4.0",
+        "mocha-suppress-logs": "^0.5.1",
+        "nyc": "^17.0.0",
+        "sinon": "^18.0.0",
+        "ts-node": "^10.9.2",
+        "tsconfig-paths": "^4.2.0",
+        "typeorm-extension": "^3.5.0",
+        "typescript": "^5.4.2"
+    }
+}
