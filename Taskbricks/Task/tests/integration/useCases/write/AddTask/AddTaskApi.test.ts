@@ -9,19 +9,22 @@ import { ExpectedTaskAddedEvent } from "tests/integration/utils/expected/events/
 
 const aggregateId: string = '92f30001-23c2-49d5-94c5-2d62139816a2';
 const now: Date = new Date();
+const title: string = 'Send Moving Reminder Email';
+const description: string = 'Send a reminder email to all users to notify them about our move.';
+const assigneeId: string = 'ffda9065-9a59-4d7a-952f-0f4c4acf002e';
 const request: AddTaskApiRequest = {
-    title: 'Send Moving Reminder Email',
-    description: 'Send a reminder email to all users to notify them about our move.',
-    assigneeId: 'ffda9065-9a59-4d7a-952f-0f4c4acf002e',
+    title: title,
+    description: description,
+    assigneeId: assigneeId,
 };
 const expectedResponse: AddTaskApiResponseBody = {
     taskId: aggregateId,
 };
 const expectedEvents: TExpectedEvent[] = [
     ExpectedTaskAddedEvent.event({
-        assigneeId: request.assigneeId,
-        description: request.description,
-        title: request.title,
+        assigneeId: assigneeId,
+        description: description,
+        title: title,
     }),
 ];
 
