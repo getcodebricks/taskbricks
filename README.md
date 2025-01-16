@@ -2,7 +2,13 @@
 
 Taskbricks is an example CQRS/EventSourcing application build with the Codebricks Platform. 
 
-## Documentation
+## Plan
+
+Taskbricks was planned and generated using the Codebricks Platform: 
+
+<img src="/resources/taskbricks_eventplan.png">
+
+## Build Yourself
 
 You can find the CodeBricks documentation [on the website](https://codebricks.tech).   
 
