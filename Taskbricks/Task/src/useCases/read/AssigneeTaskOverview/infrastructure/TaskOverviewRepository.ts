@@ -8,7 +8,7 @@ export class TaskOverviewRepository {
     async getTasksByAssigneeId(assigneeId: string): Promise<TaskOverview[]> {
         return await AppDataSource.manager.find(TaskOverviewEntity, {
             where: {
-                taskId: assigneeId,
+                assigneeId: assigneeId,
             }
         });
     }

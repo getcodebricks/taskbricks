@@ -123,7 +123,7 @@ Resources:
                 - Ref: LayerNodeModules
             Runtime: nodejs20.x
             MemorySize: 1024
-            Timeout: 99
+            Timeout: 299
             Policies:
                 - CloudWatchLambdaInsightsExecutionRolePolicy
                 - SQSSendMessagePolicy:
@@ -141,7 +141,7 @@ Resources:
         Type: AWS::SQS::Queue
         Properties:
             QueueName: TaskTaskOverviewProjection3baf7Queue
-            VisibilityTimeout: 99
+            VisibilityTimeout: 299
     TaskTaskOverviewProjection3baf7QueuePolicy:
         Type: AWS::SQS::QueuePolicy
         Properties:
@@ -181,7 +181,7 @@ Resources:
                 - Ref: LayerNodeModules
             Runtime: nodejs20.x
             MemorySize: 1024
-            Timeout: 99
+            Timeout: 299
             Policies:
                 - CloudWatchLambdaInsightsExecutionRolePolicy
     TaskAssigneeTaskOverview0dd1b:
@@ -215,7 +215,7 @@ Resources:
                 - Ref: LayerNodeModules
             Runtime: nodejs20.x
             MemorySize: 1024
-            Timeout: 99
+            Timeout: 299
             Policies:
                 - CloudWatchLambdaInsightsExecutionRolePolicy
                 - SQSSendMessagePolicy:
@@ -236,7 +236,7 @@ Resources:
         Type: AWS::SQS::Queue
         Properties:
             QueueName: Task-PublisherQueue
-            VisibilityTimeout: 99
+            VisibilityTimeout: 299
     PublisherQueuePolicy:
         Type: AWS::SQS::QueuePolicy
         Properties:

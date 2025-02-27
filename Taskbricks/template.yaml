@@ -12,13 +12,23 @@ Resources:
         Type: AWS::Events::EventBus
         Properties:
             Name: Taskbricks-EventBus
+    DatabaseSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupName: VPC Postgres
+            GroupDescription: VPC Postgres Traffic
+            SecurityGroupIngress:
+                - IpProtocol: tcp
+                  FromPort: 5432
+                  ToPort: 5432
+                  CidrIp: 0.0.0.0/0
     Database:
         Type: AWS::RDS::DBInstance
         Properties:
             DBInstanceIdentifier: taskbricks
             DBInstanceClass: db.t4g.micro
             Engine: postgres
-            EngineVersion: "16.2"
+            EngineVersion: "16.3"
             AllocatedStorage: 20
             MasterUsername:
                 Ref: PostgresUsername
@@ -26,6 +36,8 @@ Resources:
                 Ref: PostgresPassword
             EnablePerformanceInsights: true
             PubliclyAccessible: true
+            VPCSecurityGroups:
+                - Fn::GetAtt: DatabaseSecurityGroup.GroupId
 Outputs:
     EventBusArn:
         Value:

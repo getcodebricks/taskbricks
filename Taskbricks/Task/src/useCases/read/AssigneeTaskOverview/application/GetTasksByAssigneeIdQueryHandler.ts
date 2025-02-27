@@ -10,7 +10,7 @@ export class GetTasksByAssigneeIdQueryHandler {
     @OverwriteProtectionBody(false)
     async handle(query: GetTasksByAssigneeIdQuery): Promise<TaskOverview[]> {
         const result: TaskOverview[] = await this.repository.getTasksByAssigneeId(
-            query.properties.taskId,
+            query.properties.assigneeId,
         );
         return result;
     }

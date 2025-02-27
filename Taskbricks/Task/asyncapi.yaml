@@ -1,0 +1,54 @@
+info:
+    title: Task Aggregate
+    version: ""
+asyncapi: 3.0.0
+channels:
+    TaskAdded:
+        address: Taskbricks.Task.TaskAdded
+        messages:
+            TaskAdded:
+                $ref: "#/components/messages/TaskAdded"
+    TaskCompleted:
+        address: Taskbricks.Task.TaskCompleted
+        messages:
+            TaskCompleted:
+                $ref: "#/components/messages/TaskCompleted"
+operations:
+    TaskAdded:
+        action: send
+        channel:
+            $ref: "#/channels/TaskAdded"
+        messages:
+            - $ref: "#/channels/TaskAdded/messages/TaskAdded"
+    TaskCompleted:
+        action: send
+        channel:
+            $ref: "#/channels/TaskCompleted"
+        messages:
+            - $ref: "#/channels/TaskCompleted/messages/TaskCompleted"
+components:
+    messages:
+        TaskAdded:
+            payload:
+                $ref: "#/components/schemas/taskAddedPayload"
+        TaskCompleted:
+            payload:
+                $ref: "#/components/schemas/taskCompletedPayload"
+    schemas:
+        taskAddedPayload:
+            required:
+                - title
+                - description
+                - assigneeId
+            type: object
+            properties:
+                title:
+                    type: string
+                description:
+                    type: string
+                assigneeId:
+                    type: string
+        taskCompletedPayload:
+            required: []
+            type: object
+            properties: {}

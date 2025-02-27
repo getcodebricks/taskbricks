@@ -41,7 +41,7 @@ export class TaskOverviewProjector extends Projector {
 
     @OverwriteProtectionBody(false)
     applyTaskbricksTaskTaskAdded(existingProjectedEntity: TaskOverview | null, eventMessage: TaskAddedEventMessage): TaskOverview {
-        const newProjectedEntity = existingProjectedEntity ?? defaultTaskOverview;
+        const newProjectedEntity = existingProjectedEntity ?? { ...defaultTaskOverview};
         newProjectedEntity.taskId = eventMessage.aggregateId;
         newProjectedEntity.title = eventMessage.payload.title;
         newProjectedEntity.description = eventMessage.payload.description;
@@ -53,7 +53,7 @@ export class TaskOverviewProjector extends Projector {
 
     @OverwriteProtectionBody(false)
     applyTaskbricksTaskTaskCompleted(existingProjectedEntity: TaskOverview | null, eventMessage: TaskCompletedEventMessage): TaskOverview {
-        const newProjectedEntity = existingProjectedEntity ?? defaultTaskOverview;
+        const newProjectedEntity = existingProjectedEntity ?? { ...defaultTaskOverview};
         newProjectedEntity.status = TaskStatusEnum.Completed;
 
         return newProjectedEntity;

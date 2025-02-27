@@ -4,7 +4,7 @@ import { ValidationError } from "@codebricks/typebricks";
 import { AssigneeIdValueObject } from "shared/domain/valueObjects/AssigneeIdValueObject";
 
 const validValues: string[] = ['50f5c256-846e-4c34-9f4c-c6e31baf8a98', 'd6327f91-4840-4c65-a58d-f6d13d3b95a1'];
-const invalidValues = ['foo',];
+const invalidValues = ['foo'];
 
 describe('AssigneeIdValueObject',
     /** @overwrite-protection-body false */

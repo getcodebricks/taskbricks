@@ -16,6 +16,12 @@ const givenEvents: Event<any>[] = [
         aggregateVersion: 1,
     }),
 ];
+const givenTaskEvents: Event<any>[] = [
+    GivenTaskAddedEvent.event({
+        aggregateId: aggregateId,
+        aggregateVersion: 1,
+    }),
+];
 const request: CompleteTaskApiRequest = {
     taskId: aggregateId,
 };
@@ -30,7 +36,7 @@ describe('POST complete-task',
             MockHelper.mockSQSClient();
             MockHelper.stubClock(now);
             await IntegrationTestHelper.resetDB();
-            await IntegrationTestHelper.givenTaskAggregate(givenEvents);
+            await IntegrationTestHelper.givenTaskAggregate(givenTaskEvents);
         });
 
         after(function() {
@@ -42,7 +48,7 @@ describe('POST complete-task',
                 IntegrationTestHelper.toApiGatewayEvent(request)
             );
             expect(result.statusCode).equal(204);
-            await IntegrationTestHelper.expectEventsOnStream(expectedEvents, givenEvents);
+            await IntegrationTestHelper.expectEventsOnStream(expectedEvents, givenTaskEvents);
         });
     });
 

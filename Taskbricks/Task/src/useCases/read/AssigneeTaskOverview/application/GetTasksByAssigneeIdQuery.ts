@@ -3,7 +3,7 @@ import { validate } from "uuid";
 import { OverwriteProtectionBody, ValidationError } from "@codebricks/typebricks";
 
 export interface GetTasksByAssigneeIdQueryProperties {
-    taskId: string;
+    assigneeId: string;
 }
 
 export class GetTasksByAssigneeIdQuery {
@@ -13,8 +13,8 @@ export class GetTasksByAssigneeIdQuery {
 
     @OverwriteProtectionBody(false)
     validate(): void {
-        if (!validate(this.properties.taskId)) {
-            throw new ValidationError('taskId is invalid');
+        if (!validate(this.properties.assigneeId)) {
+            throw new ValidationError('assigneeId is invalid');
         }
     }
 }
